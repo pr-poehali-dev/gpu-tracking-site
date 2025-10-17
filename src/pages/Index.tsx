@@ -5,7 +5,10 @@ import UserDashboard from '@/components/UserDashboard';
 import { User, QueueItem, API_URLS } from '@/lib/types';
 
 const Index = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [adminData, setAdminData] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -61,14 +64,20 @@ const Index = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const handleAuthSuccess = (newUser: User) => {
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
+  };
+
   const handleLogout = () => {
     setUser(null);
     setQueue([]);
     setAdminData(null);
+    localStorage.removeItem('user');
   };
 
   if (!user) {
-    return <AuthForm onAuthSuccess={setUser} />;
+    return <AuthForm onAuthSuccess={handleAuthSuccess} />;
   }
 
   if (user.role === 'admin') {
