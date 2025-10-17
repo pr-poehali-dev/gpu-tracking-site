@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "name": "Get queue list",
+      "method": "GET",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "queue": []
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Add to queue",
+      "method": "POST",
+      "body": {
+        "user_id": 1,
+        "username": "testuser",
+        "gpu_name": "GPU-001",
+        "duration_minutes": 30
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

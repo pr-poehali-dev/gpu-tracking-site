@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get admin data with auth",
+      "method": "GET",
+      "headers": {
+        "X-User-Role": "admin"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "queue_stats": {}
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
