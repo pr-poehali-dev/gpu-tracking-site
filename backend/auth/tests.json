@@ -5,9 +5,10 @@
       "method": "POST",
       "body": {
         "action": "register",
-        "username": "testuser",
+        "username": "testuser_unique",
         "password": "test123",
-        "role": "user"
+        "role": "user",
+        "student_group": "Группа A"
       },
       "expectedStatus": 200,
       "expectedBody": {

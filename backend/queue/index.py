@@ -32,7 +32,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     if method == 'GET':
         cur.execute("""
             SELECT q.id, q.user_id, q.username, q.gpu_name, q.duration_minutes, 
-                   q.start_time, q.end_time, q.status, q.position, q.created_at
+                   q.start_time, q.end_time, q.status, q.position, q.created_at, q.student_group
             FROM queue q
             WHERE q.status IN ('waiting', 'active')
             ORDER BY q.position ASC, q.created_at ASC
@@ -50,7 +50,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'end_time': row[6].isoformat() if row[6] else None,
                 'status': row[7],
                 'position': row[8],
-                'created_at': row[9].isoformat() if row[9] else None
+                'created_at': row[9].isoformat() if row[9] else None,
+                'student_group': row[10] or 'Без группы'
             }
             queue_items.append(item)
         
@@ -70,15 +71,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         username = body_data.get('username')
         gpu_name = body_data.get('gpu_name')
         duration_minutes = body_data.get('duration_minutes', 30)
+        student_group = body_data.get('student_group', 'Группа 1')
         
         cur.execute("SELECT COUNT(*) FROM queue WHERE status IN ('waiting', 'active')")
         position = cur.fetchone()[0] + 1
         
         cur.execute("""
-            INSERT INTO queue (user_id, username, gpu_name, duration_minutes, status, position)
-            VALUES (%s, %s, %s, %s, 'waiting', %s)
+            INSERT INTO queue (user_id, username, gpu_name, duration_minutes, status, position, student_group)
+            VALUES (%s, %s, %s, %s, 'waiting', %s, %s)
             RETURNING id, position, created_at
-        """, (user_id, username, gpu_name, duration_minutes, position))
+        """, (user_id, username, gpu_name, duration_minutes, position, student_group))
         
         result = cur.fetchone()
         conn.commit()

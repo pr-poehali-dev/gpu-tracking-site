@@ -33,7 +33,8 @@ const UserDashboard = ({ user, queue, currentTime, onLogout, onQueueUpdate }: Us
           user_id: user.id,
           username: user.username,
           gpu_name: selectedGpu,
-          duration_minutes: parseInt(duration)
+          duration_minutes: parseInt(duration),
+          student_group: user.student_group
         })
       });
 
@@ -66,6 +67,13 @@ const UserDashboard = ({ user, queue, currentTime, onLogout, onQueueUpdate }: Us
   const userQueueItems = queue.filter(q => q.user_id === user.id);
   const activeSession = userQueueItems.find(q => q.status === 'active');
 
+  const groupedQueue = queue.reduce((acc, item) => {
+    const group = item.student_group || 'Без группы';
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(item);
+    return acc;
+  }, {} as Record<string, QueueItem[]>);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
@@ -76,7 +84,7 @@ const UserDashboard = ({ user, queue, currentTime, onLogout, onQueueUpdate }: Us
             </div>
             <div>
               <h1 className="text-xl font-bold">GPU Queue</h1>
-              <p className="text-xs text-muted-foreground">{user.username}</p>
+              <p className="text-xs text-muted-foreground">{user.username} • {user.student_group}</p>
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={onLogout}>
@@ -131,39 +139,48 @@ const UserDashboard = ({ user, queue, currentTime, onLogout, onQueueUpdate }: Us
               <CardTitle>Очередь GPU</CardTitle>
               <CardDescription>Текущие запросы на использование</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-5">
               {queue.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Icon name="Inbox" className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>Очередь пуста</p>
                 </div>
               ) : (
-                queue.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border ${
-                      item.user_id === user.id ? 'bg-primary/5 border-primary/30' : 'bg-background/50 border-border/50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary font-bold">
-                        {item.position}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{item.username}</p>
-                        <p className="text-sm text-muted-foreground">{item.gpu_name} • {item.duration_minutes} мин</p>
-                      </div>
+                Object.entries(groupedQueue).map(([groupName, items]) => (
+                  <div key={groupName} className="space-y-3">
+                    <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                      <Icon name="Users" className="h-4 w-4 text-primary" />
+                      <h3 className="font-semibold text-sm">{groupName}</h3>
+                      <Badge variant="outline" className="ml-auto">{items.length}</Badge>
                     </div>
-                    <div className="text-right">
-                      <Badge variant={item.status === 'active' ? 'default' : 'secondary'}>
-                        {item.status === 'active' ? 'Активен' : 'Ожидает'}
-                      </Badge>
-                      {item.status === 'active' && item.end_time && (
-                        <p className="text-sm text-muted-foreground mt-1 tabular-nums">
-                          {calculateTimeRemaining(item.end_time)}
-                        </p>
-                      )}
-                    </div>
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`flex items-center justify-between p-4 rounded-lg border ${
+                          item.user_id === user.id ? 'bg-primary/5 border-primary/30' : 'bg-background/50 border-border/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 text-primary font-bold">
+                            {item.position}
+                          </div>
+                          <div>
+                            <p className="font-semibold">{item.username}</p>
+                            <p className="text-sm text-muted-foreground">{item.gpu_name} • {item.duration_minutes} мин</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant={item.status === 'active' ? 'default' : 'secondary'}>
+                            {item.status === 'active' ? 'Активен' : 'Ожидает'}
+                          </Badge>
+                          {item.status === 'active' && item.end_time && (
+                            <p className="text-sm text-muted-foreground mt-1 tabular-nums">
+                              {calculateTimeRemaining(item.end_time)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ))
               )}

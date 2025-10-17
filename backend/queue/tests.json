@@ -5,7 +5,12 @@
       "method": "GET",
       "expectedStatus": 200,
       "expectedBody": {
-        "queue": []
+        "queue": [
+          {
+            "status": "string",
+            "student_group": "string"
+          }
+        ]
       },
       "bodyMatcher": "partial"
     },

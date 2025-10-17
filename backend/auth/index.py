@@ -35,6 +35,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         username = body_data.get('username', '').strip()
         password = body_data.get('password', '').strip()
         role = body_data.get('role', 'user')
+        student_group = body_data.get('student_group', 'Группа 1')
         
         if not username or not password:
             cur.close()
@@ -51,8 +52,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if action == 'register':
             try:
                 cur.execute(
-                    "INSERT INTO users (username, password, role) VALUES (%s, %s, %s) RETURNING id, username, role, created_at",
-                    (username, password_hash, role)
+                    "INSERT INTO users (username, password, role, student_group) VALUES (%s, %s, %s, %s) RETURNING id, username, role, student_group, created_at",
+                    (username, password_hash, role, student_group)
                 )
                 user = cur.fetchone()
                 conn.commit()
@@ -63,7 +64,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'id': user[0],
                         'username': user[1],
                         'role': user[2],
-                        'created_at': user[3].isoformat() if user[3] else None
+                        'student_group': user[3],
+                        'created_at': user[4].isoformat() if user[4] else None
                     }
                 }
                 
@@ -89,7 +91,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         elif action == 'login':
             cur.execute(
-                "SELECT id, username, role, created_at FROM users WHERE username = %s AND password = %s",
+                "SELECT id, username, role, student_group, created_at FROM users WHERE username = %s AND password = %s",
                 (username, password_hash)
             )
             user = cur.fetchone()
@@ -101,7 +103,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                         'id': user[0],
                         'username': user[1],
                         'role': user[2],
-                        'created_at': user[3].isoformat() if user[3] else None
+                        'student_group': user[3],
+                        'created_at': user[4].isoformat() if user[4] else None
                     }
                 }
                 

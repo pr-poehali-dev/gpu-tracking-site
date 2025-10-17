@@ -2,6 +2,7 @@ export interface User {
   id: number;
   username: string;
   role: 'user' | 'admin';
+  student_group?: string;
 }
 
 export interface QueueItem {
@@ -14,6 +15,7 @@ export interface QueueItem {
   end_time: string | null;
   status: string;
   position: number;
+  student_group: string;
 }
 
 export const API_URLS = {

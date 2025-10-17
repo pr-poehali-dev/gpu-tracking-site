@@ -18,6 +18,7 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'user' | 'admin'>('user');
+  const [studentGroup, setStudentGroup] = useState('Группа 1');
   const [loading, setLoading] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -32,7 +33,8 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
           action: isLogin ? 'login' : 'register',
           username,
           password,
-          role: isLogin ? undefined : role
+          role: isLogin ? undefined : role,
+          student_group: isLogin ? undefined : studentGroup
         })
       });
 
@@ -97,9 +99,21 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
               </div>
 
               {!isLogin && (
-                <div className="space-y-3">
-                  <Label>Роль</Label>
-                  <RadioGroup value={role} onValueChange={(v) => setRole(v as 'user' | 'admin')}>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="student_group">Группа студентов</Label>
+                    <Input
+                      id="student_group"
+                      placeholder="Введите название группы"
+                      value={studentGroup}
+                      onChange={(e) => setStudentGroup(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Роль</Label>
+                    <RadioGroup value={role} onValueChange={(v) => setRole(v as 'user' | 'admin')}>
                     <div className="flex items-center space-x-2 p-3 rounded-lg border border-border/50 bg-background/50">
                       <RadioGroupItem value="user" id="user" />
                       <Label htmlFor="user" className="flex-1 cursor-pointer">
@@ -124,8 +138,9 @@ const AuthForm = ({ onAuthSuccess }: AuthFormProps) => {
                         </div>
                       </Label>
                     </div>
-                  </RadioGroup>
-                </div>
+                    </RadioGroup>
+                  </div>
+                </>
               )}
 
               <Button type="submit" className="w-full" disabled={loading}>
